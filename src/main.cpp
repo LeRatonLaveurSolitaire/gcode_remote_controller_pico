@@ -1,38 +1,31 @@
 #include <Arduino.h>
+
 #include <FreeRTOSConfig.h>
 #include <FreeRTOS.h>
 #include <task.h>
-#include <U8g2lib.h>
+#include "TaskList.h"
+#include <stdint.h>
 #include <Wire.h>
 
-U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0);
 
-// define tasks 
-void TaskScreen( void *pvParameters );
-void TaskEncoder( void *pvParameters );
-void TaskSerialManager( void *pvParameters );
 
 // the setup function runs once when you press reset or power the board
 void setup() {
   
-    // Initialize the display
+  pinMode(LED_BUILTIN,OUTPUT);
 
+  Serial.begin(9600);
+  // Wire.setSDA(8);
+  // Wire.setSCL(9);
+  Wire.begin();
 
-
-  Serial.begin(115200);
-  
-  while (!Serial) {
-    ; // wait for serial port to connect. Needed for native USB, on LEONARDO, MICRO, YUN, and other 32u4 based boards.
-  }
-
-  
 
   xTaskCreate(
     TaskEncoder
     ,  "Encoder"
     ,  128  // Stack size
     ,  NULL
-    ,  1  // Priority
+    ,  2  // Priority
     ,  NULL );
 
   xTaskCreate(
@@ -40,73 +33,39 @@ void setup() {
     ,  "SerialManager"
     ,  1024  // Stack size
     ,  NULL
-    ,  0  // Priority
+    ,  2  // Priority
     ,  NULL );
 
-  // Now the task scheduler, which takes over control of scheduling individual tasks, is automatically started.
-}
-
-void setup1(){
- 
-
   xTaskCreate(
-      TaskScreen
-      ,  "Screen"   // A name just for humans
-      ,  4096  // This stack size can be checked & adjusted by reading the Stack Highwater
-      ,  NULL
-      ,  3  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
-      ,  NULL );
+    TaskScreen
+    ,  "Screen"   // A name just for humans
+    ,  4096  // This stack size can be checked & adjusted by reading the Stack Highwater
+    ,  NULL
+    ,  1  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and 0 being the lowest.
+    ,  NULL );
 
 }
+
+// void setup1(){
+
+// }
 
 void loop()
 {
   // Empty. Things are done in Tasks.
 }
 
-void loop1()
-{
-  // Empty. Things are done in Tasks.
-}
+// void loop1()
+// {
+//   // Empty. Things are done in Tasks.
+// }
 
 /*--------------------------------------------------*/
 /*---------------------- Tasks ---------------------*/
 /*--------------------------------------------------*/
-void TaskScreen(void *pvParameters){
-  
-  Wire.begin();
-  u8g2.begin();
-  for (;;) {// A Task shall never return or exit.
-    u8g2.firstPage();
-    do
-    {
-      // u8g2.drawXBMP(0, 0, 128, 64, &images[current_img * IMG_SIZE]);
-      u8g2
 
-    } while (u8g2.nextPage());
-    vTaskDelay(200);
-  }
-}
 
-void TaskEncoder(void *pvParameters){
-  
-  
-  for (;;) {// A Task shall never return or exit.
 
-    vTaskDelay(200);
-  }
-}
-
-void TaskSerialManager(void *pvParameters){
-  
-  
-  for (;;) {// A Task shall never return or exit.
-    while(Serial.available()){
-
-    }
-    vTaskDelay(200);
-  }
-}
 
 // void TaskBlink(void *pvParameters)  // This is a task.
 // {
