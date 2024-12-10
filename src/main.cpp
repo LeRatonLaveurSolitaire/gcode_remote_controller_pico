@@ -81,7 +81,7 @@ void TaskScreen(void *pvParameters){
     do
     {
       // u8g2.drawXBMP(0, 0, 128, 64, &images[current_img * IMG_SIZE]);
-      
+      u8g2
 
     } while (u8g2.nextPage());
     vTaskDelay(200);
