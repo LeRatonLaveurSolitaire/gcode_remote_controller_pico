@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <FreeRTOS.h>
 #include <task.h>
+#include <status.h>
 
 void TaskEncoder(void *pvParameters){
   

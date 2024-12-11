@@ -1,24 +1,26 @@
 #include <Arduino.h>
-
-#include <FreeRTOSConfig.h>
 #include <FreeRTOS.h>
+#include <FreeRTOSConfig.h>
 #include <task.h>
-#include "TaskList.h"
+//#include "TaskList.h"
 #include <stdint.h>
 #include <Wire.h>
+#include <status.h>
 
 
+#include "TaskEncoder.h"
+#include "TaskScreen.h"
+#include "TaskSerialManager.h"
 
 // the setup function runs once when you press reset or power the board
 void setup() {
   
   pinMode(LED_BUILTIN,OUTPUT);
 
-  Serial.begin(9600);
-  // Wire.setSDA(8);
-  // Wire.setSCL(9);
+  Serial.begin(115200);
+  Wire.setSDA(7);
+  Wire.setSCL(9);
   Wire.begin();
-
 
   xTaskCreate(
     TaskEncoder
