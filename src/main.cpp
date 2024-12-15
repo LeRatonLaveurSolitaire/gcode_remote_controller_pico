@@ -7,20 +7,21 @@
 #include <Wire.h>
 #include <status.h>
 
+#include "semphr.h"
 
 #include "TaskEncoder.h"
 #include "TaskScreen.h"
 #include "TaskSerialManager.h"
+
+SemaphoreHandle_t xStatusMutex = NULL;
+global_status system_state;
 
 // the setup function runs once when you press reset or power the board
 void setup() {
   
   pinMode(LED_BUILTIN,OUTPUT);
 
-  Serial.begin(115200);
-  Wire.setSDA(7);
-  Wire.setSCL(9);
-  Wire.begin();
+  xStatusMutex = xSemaphoreCreateMutex();
 
   xTaskCreate(
     TaskEncoder
