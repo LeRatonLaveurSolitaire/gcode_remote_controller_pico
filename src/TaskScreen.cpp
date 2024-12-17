@@ -7,6 +7,10 @@
 
 U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0);
 
+
+  
+  
+
 void TaskScreen(void* pvParameters) {
   Wire.begin();
   u8g2.begin();
@@ -16,10 +20,8 @@ void TaskScreen(void* pvParameters) {
     u8g2.drawStr(30, 30, "Loading");
     u8g2.drawStr(15, 50, "Please wait...");
   } while (u8g2.nextPage());
-
-  char msg[20];
   global_status system_state_local;
-
+  char msg[20];
   for (;;) {  // A Task shall never return or exit.
 
     xSemaphoreTake(xStatusMutex, portMAX_DELAY);
@@ -32,6 +34,7 @@ void TaskScreen(void* pvParameters) {
     system_state_local.communication_state = system_state.communication_state;
     system_state_local.axis_is_selected = system_state.axis_is_selected;
     xSemaphoreGive(xStatusMutex);
+
     u8g2.clearBuffer();
 
     u8g2.firstPage();
@@ -99,7 +102,7 @@ void TaskScreen(void* pvParameters) {
 
     } while (u8g2.nextPage());
 
-    vTaskDelay(200);
+    vTaskDelay(pdMS_TO_TICKS(200));
 
     // digitalWrite(LED_BUILTIN,1);
     // vTaskDelay(500);

@@ -21,12 +21,12 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
 
   xStatusMutex = xSemaphoreCreateMutex();
-  xCommmandQueue = xQueueCreate(32, 50);
+  xCommmandQueue = xQueueCreate(16, 50 * sizeof(char));
 
   xTaskCreate(
 
       TaskEncoder, "Encoder",
-      128,  // Stack size
+      1024,  // Stack size
       NULL,
       2,  // Priority
       NULL

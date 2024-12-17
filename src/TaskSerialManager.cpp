@@ -5,14 +5,16 @@
 #include "semphr.h"
 
 void TaskSerialManager(void* pvParameters) {
-    Serial.begin(115200);
-  char msg[50];
+  Serial.begin(115200);
+  static char msg[50] = {};
 
   for (;;) {  // A Task shall never return or exit.
-    if (uxQueueMessagesWaiting(xCommmandQueue)) {
-      xQueueReceive(xCommmandQueue, msg, 100);
+    // Serial.println(uxQueueMessagesWaiting(xCommmandQueue));
+    if (xQueueReceive(xCommmandQueue, msg, 50) == pdTRUE){
       Serial.println(msg);
+      //xQueueReceive(xCommmandQueue, msg, portMAX_DELAY);
     }
-    vTaskDelay(100);
+
+    vTaskDelay(pdMS_TO_TICKS(100));
   }
 }
