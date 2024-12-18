@@ -18,16 +18,39 @@
 
 void IRQ_encode();
 void IRQ_switch();
+void IRQ_F_plus();
+void IRQ_F_minus();
+void IRQ_step_plus();
+void IRQ_step_minus();
+void IRQ_set_0();
+void IRQ_goto_0();
+void IRQ_emergency_stop();
+
 volatile int encoder_val = 0;
 volatile int switch_val = 0;
+volatile int F_plus = 0;
+volatile int F_minus = 0;
+volatile int step_plus_val = 0;
+volatile int step_minus_val = 0;
+volatile int set_0_val = 0;
+volatile int goto_0_val = 0;
+
 
 
 void TaskEncoder(void* pvParameters) {
-  pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(PIN_ENC_READ, INPUT);
-  pinMode(PIN_ENC_TRIG, INPUT);
+  pinMode(PIN_ENC_READ, INPUT_PULLDOWN);
+  pinMode(PIN_ENC_TRIG, INPUT_PULLDOWN);
+
   attachInterrupt(PIN_ENC_TRIG, IRQ_encode, RISING);
   attachInterrupt(PIN_ENC_SWTC, IRQ_switch, FALLING);
+
+  attachInterrupt(PIN_F_PLUS,IRQ_F_plus , FALLING);
+  attachInterrupt(PIN_F_MINUS,IRQ_F_minus , FALLING);
+  attachInterrupt(PIN_SETP_PLUS,IRQ_step_plus , FALLING);
+  attachInterrupt(PIN_SETP_MINUS,IRQ_step_minus , FALLING);
+  attachInterrupt(PIN_SET_0,IRQ_set_0 , FALLING);
+  attachInterrupt(PIN_GOTO_0, IRQ_goto_0, FALLING);
+  attachInterrupt(PIN_EMERGENCY_STOP,IRQ_emergency_stop , FALLING);
 
   global_status system_state_local;
   char command_to_send[50]={};
@@ -59,24 +82,24 @@ void TaskEncoder(void* pvParameters) {
         sprintf(command_to_send, "G1 F%.1f %c%.3f ",
                 system_state_local.f,
                 axis_chr[system_state_local.selected_axis],
-                system_state_local.step_size * encoder_val / abs(encoder_val)
+                system_state_local.step_size * encoder_val
                 );
         if(xQueueSendToFront(xCommmandQueue, command_to_send, portMAX_DELAY) == pdTRUE) {}//Serial.println("sent");
 
         switch (system_state_local.selected_axis) {
           case AXIS_X:
             xSemaphoreTake(xStatusMutex, portMAX_DELAY);
-            system_state.x +=system_state_local.step_size * encoder_val / abs(encoder_val);
+            system_state.x +=system_state_local.step_size * encoder_val;
             xSemaphoreGive(xStatusMutex);
             break;
           case AXIS_Y:
             xSemaphoreTake(xStatusMutex, portMAX_DELAY);
-            system_state.y +=system_state_local.step_size * encoder_val / abs(encoder_val);
+            system_state.y +=system_state_local.step_size * encoder_val;
             xSemaphoreGive(xStatusMutex);
             break;
           case AXIS_Z:
             xSemaphoreTake(xStatusMutex, portMAX_DELAY);
-            system_state.z +=system_state_local.step_size * encoder_val / abs(encoder_val);
+            system_state.z +=system_state_local.step_size * encoder_val;
             xSemaphoreGive(xStatusMutex);
             break;
           default:
@@ -92,20 +115,84 @@ void TaskEncoder(void* pvParameters) {
       xSemaphoreGive(xStatusMutex);
       switch_val = 0;
     }
-    vTaskDelay(pdMS_TO_TICKS(100));
+
+    if (F_plus) {
+      if (system_state_local.f < MAX_SPEED){
+      xSemaphoreTake(xStatusMutex, portMAX_DELAY);
+      system_state.f += 10;
+      xSemaphoreGive(xStatusMutex);
+      }
+      F_plus = 0;
+    }
+
+    if (F_minus) {
+      if (system_state_local.f > MIN_SPEED){
+      xSemaphoreTake(xStatusMutex, portMAX_DELAY);
+      system_state.f -= 10;
+      xSemaphoreGive(xStatusMutex);
+      }
+      F_minus= 0;
+    }
+    if (F_minus) {
+      if (system_state_local.f > MIN_SPEED){
+      xSemaphoreTake(xStatusMutex, portMAX_DELAY);
+      system_state.f -= 10;
+      xSemaphoreGive(xStatusMutex);
+      }
+      F_minus= 0;
+    }
+
+    if (F_minus) {
+      if (system_state_local.f > MIN_SPEED){
+      xSemaphoreTake(xStatusMutex, portMAX_DELAY);
+      system_state.f -= 10;
+      xSemaphoreGive(xStatusMutex);
+      }
+      F_minus= 0;
+    }
+
+    vTaskDelay(pdMS_TO_TICKS(50));
   }
 }
 
 void IRQ_encode() {
   // static int last_called =0;
-  // if (millis() - last_called > 50){
+  // if (millis() - last_called > 10){
 
   // 1 if rotated clockwise, -1 if rotated anti-clockwise
   encoder_val = 1 - 2 * digitalRead(PIN_ENC_READ);
 
-  //}
+  // }
   // last_called = millis();
 }
 void IRQ_switch() {
   switch_val = 1;
+}
+
+void IRQ_F_plus(){
+  F_plus = 1;
+}
+
+void IRQ_F_minus(){
+  F_minus = 1;
+}
+
+void IRQ_step_plus(){
+  step_plus_val = 1;
+}
+
+void IRQ_step_minus(){
+  step_minus_val = 1;
+}
+
+void IRQ_set_0(){
+  set_0_val = 1;
+}
+
+void IRQ_goto_0(){
+  goto_0_val = 1;
+}
+
+void IRQ_emergency_stop(){
+
 }

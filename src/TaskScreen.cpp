@@ -79,10 +79,13 @@ void TaskScreen(void* pvParameters) {
           : sprintf(msg, "  %2.0f", system_state_local.step_size);
       u8g2.print(msg);
 
+      (system_state_local.axis_is_selected) ? u8g2.setDrawColor(0)
+                                            : u8g2.setDrawColor(1);
+
       u8g2.setCursor(66, 16 * 4 - 2);
       sprintf(msg, "Select %c", axis_chr[system_state_local.selected_axis]);
       u8g2.print(msg);
-
+      u8g2.setDrawColor(1);
       u8g2.setCursor(66, 16 * 1 - 2);
       u8g2.print(system_state_local.axis_is_selected);
 

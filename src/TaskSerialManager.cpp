@@ -10,7 +10,7 @@ void TaskSerialManager(void* pvParameters) {
 
   for (;;) {  // A Task shall never return or exit.
     // Serial.println(uxQueueMessagesWaiting(xCommmandQueue));
-    if (xQueueReceive(xCommmandQueue, msg, 50) == pdTRUE){
+    if (xQueueReceive(xCommmandQueue, msg, 10) == pdTRUE){
       Serial.println(msg);
       //xQueueReceive(xCommmandQueue, msg, portMAX_DELAY);
     }
