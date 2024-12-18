@@ -14,7 +14,7 @@
 #define AXIS_Y 1
 #define AXIS_Z 2
 
-#define MAX_SPEED 150
+#define MAX_SPEED 500
 #define MIN_SPEED 10
 
 #define MAX_STEP 10
@@ -25,7 +25,7 @@ struct {
   float y = 0;
   float z = 0;
   float f = MIN_SPEED;
-  float step_size = MIN_STEP;
+  float step_size = MAX_STEP;
   bool axis_is_selected = false;
   int selected_axis = AXIS_X;
   int communication_state = STATE_UNKNWON;

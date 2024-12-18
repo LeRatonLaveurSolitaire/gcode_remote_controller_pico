@@ -11,7 +11,7 @@
 #define PIN_F_PLUS 6
 #define PIN_F_MINUS 7
 #define PIN_SETP_PLUS 8
-#define PIN_SETP_MINUS 9
+#define PIN_SETP_MINUS 22
 #define PIN_SET_0 10
 #define PIN_GOTO_0 11
 #define PIN_EMERGENCY_STOP 12
@@ -35,11 +35,17 @@ volatile int step_minus_val = 0;
 volatile int set_0_val = 0;
 volatile int goto_0_val = 0;
 
-
-
 void TaskEncoder(void* pvParameters) {
   pinMode(PIN_ENC_READ, INPUT_PULLDOWN);
   pinMode(PIN_ENC_TRIG, INPUT_PULLDOWN);
+
+  pinMode(PIN_F_PLUS, INPUT_PULLUP);
+  pinMode(PIN_F_MINUS, INPUT_PULLUP);
+  pinMode(PIN_SETP_PLUS, INPUT_PULLUP);
+  pinMode(PIN_SETP_MINUS, INPUT_PULLUP);
+  pinMode(PIN_SET_0, INPUT_PULLUP);
+  pinMode(PIN_GOTO_0, INPUT_PULLUP);
+  pinMode(PIN_EMERGENCY_STOP, INPUT_PULLUP);
 
   attachInterrupt(PIN_ENC_TRIG, IRQ_encode, RISING);
   attachInterrupt(PIN_ENC_SWTC, IRQ_switch, FALLING);
@@ -117,38 +123,50 @@ void TaskEncoder(void* pvParameters) {
     }
 
     if (F_plus) {
-      if (system_state_local.f < MAX_SPEED){
       xSemaphoreTake(xStatusMutex, portMAX_DELAY);
-      system_state.f += 10;
-      xSemaphoreGive(xStatusMutex);
+      if (system_state.f < MAX_SPEED){
+        system_state.f += 10;
       }
+      xSemaphoreGive(xStatusMutex);
       F_plus = 0;
     }
 
     if (F_minus) {
-      if (system_state_local.f > MIN_SPEED){
       xSemaphoreTake(xStatusMutex, portMAX_DELAY);
-      system_state.f -= 10;
-      xSemaphoreGive(xStatusMutex);
+      if (system_state.f > MIN_SPEED){
+        system_state.f -= 10;
       }
+      xSemaphoreGive(xStatusMutex);
       F_minus= 0;
     }
-    if (F_minus) {
-      if (system_state_local.f > MIN_SPEED){
+    if (step_plus_val) {
       xSemaphoreTake(xStatusMutex, portMAX_DELAY);
-      system_state.f -= 10;
-      xSemaphoreGive(xStatusMutex);
+      if (system_state.step_size < 0.9*MAX_STEP){
+        system_state.step_size *= 10;
       }
-      F_minus= 0;
+      xSemaphoreGive(xStatusMutex);
+      step_plus_val= 0;
     }
 
-    if (F_minus) {
-      if (system_state_local.f > MIN_SPEED){
+    if (step_minus_val) {
       xSemaphoreTake(xStatusMutex, portMAX_DELAY);
-      system_state.f -= 10;
-      xSemaphoreGive(xStatusMutex);
+      if (system_state.step_size > 1.1 * MIN_STEP){
+        system_state.step_size /= 10;
       }
-      F_minus= 0;
+      xSemaphoreGive(xStatusMutex);
+      step_minus_val= 0;
+    }
+
+    if (set_0_val) {
+      sprintf(command_to_send, "G28.1");
+      if(xQueueSendToFront(xCommmandQueue, command_to_send, portMAX_DELAY) == pdTRUE) {}
+      set_0_val= 0;
+    }
+
+    if (goto_0_val) {
+      sprintf(command_to_send, "G28");
+      if(xQueueSendToFront(xCommmandQueue, command_to_send, portMAX_DELAY) == pdTRUE) {}
+      goto_0_val= 0;
     }
 
     vTaskDelay(pdMS_TO_TICKS(50));
