@@ -5,14 +5,14 @@
 #include <stdio.h>
 #include "semphr.h"
 
-#define PIN_ENC_TRIG 18
-#define PIN_ENC_READ 19
-#define PIN_ENC_SWTC 20
-#define PIN_F_PLUS 6
-#define PIN_F_MINUS 7
-#define PIN_SETP_PLUS 8
-#define PIN_SETP_MINUS 22
-#define PIN_SET_0 10
+#define PIN_ENC_READ 7
+#define PIN_ENC_TRIG 8
+#define PIN_ENC_SWTC 6
+#define PIN_F_PLUS 27
+#define PIN_F_MINUS 26
+#define PIN_SETP_PLUS 9
+#define PIN_SETP_MINUS 10
+#define PIN_SET_0 13
 #define PIN_GOTO_0 11
 #define PIN_EMERGENCY_STOP 12
 
@@ -36,9 +36,9 @@ volatile int set_0_val = 0;
 volatile int goto_0_val = 0;
 
 void TaskEncoder(void* pvParameters) {
-  pinMode(PIN_ENC_READ, INPUT_PULLDOWN);
-  pinMode(PIN_ENC_TRIG, INPUT_PULLDOWN);
-
+  pinMode(PIN_ENC_READ, INPUT_PULLUP);
+  pinMode(PIN_ENC_TRIG, INPUT_PULLUP);
+  pinMode(PIN_ENC_SWTC, INPUT_PULLUP);
   pinMode(PIN_F_PLUS, INPUT_PULLUP);
   pinMode(PIN_F_MINUS, INPUT_PULLUP);
   pinMode(PIN_SETP_PLUS, INPUT_PULLUP);
@@ -85,7 +85,7 @@ void TaskEncoder(void* pvParameters) {
 
       else {
 
-        sprintf(command_to_send, "G1 F%.1f %c%.3f ",
+        sprintf(command_to_send, "$J=G91 G1 F%.1f %c%.2f ",
                 system_state_local.f,
                 axis_chr[system_state_local.selected_axis],
                 system_state_local.step_size * encoder_val
@@ -178,7 +178,7 @@ void IRQ_encode() {
   // if (millis() - last_called > 10){
 
   // 1 if rotated clockwise, -1 if rotated anti-clockwise
-  encoder_val = 1 - 2 * digitalRead(PIN_ENC_READ);
+  encoder_val =  2 * digitalRead(PIN_ENC_READ) - 1;
 
   // }
   // last_called = millis();
@@ -212,5 +212,8 @@ void IRQ_goto_0(){
 }
 
 void IRQ_emergency_stop(){
-
+  xSemaphoreTake(xSerialMutex, portMAX_DELAY);
+  Serial.println(0x85);
+  xQueueReset(xCommmandQueue);
+  xSemaphoreGive(xSerialMutex);
 }

@@ -12,15 +12,18 @@
 #include "semphr.h"
 
 SemaphoreHandle_t xStatusMutex = NULL;
+SemaphoreHandle_t xSerialMutex = NULL;
 QueueHandle_t xCommmandQueue = NULL;
 global_status system_state;
+
 char axis_chr[] = {'X', 'Y', 'Z'};
 
 // the setup function runs once when you press reset or power the board
 void setup() {
-  pinMode(LED_BUILTIN, OUTPUT);
-
+  pinMode(16, OUTPUT);
+  digitalWrite(16,HIGH);
   xStatusMutex = xSemaphoreCreateMutex();
+  xSerialMutex = xSemaphoreCreateMutex();
   xCommmandQueue = xQueueCreate(16, 50 * sizeof(char));
 
   xTaskCreate(

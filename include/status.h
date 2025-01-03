@@ -25,16 +25,18 @@ struct {
   float y = 0;
   float z = 0;
   float f = MIN_SPEED;
-  float step_size = MAX_STEP;
+  float step_size = 1;
   bool axis_is_selected = false;
   int selected_axis = AXIS_X;
   int communication_state = STATE_UNKNWON;
+  char msg_received[50] = {};
 } typedef global_status;
 
 extern char axis_chr[];
 
 extern global_status system_state;
 extern SemaphoreHandle_t xStatusMutex;
+extern SemaphoreHandle_t xSerialMutex;
 extern QueueHandle_t xCommmandQueue;
 
 #endif
