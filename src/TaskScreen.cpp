@@ -7,10 +7,6 @@
 
 U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R2);
 
-
-  
-  
-
 void TaskScreen(void* pvParameters) {
   Wire.begin();
   u8g2.begin();
@@ -22,6 +18,10 @@ void TaskScreen(void* pvParameters) {
   } while (u8g2.nextPage());
   global_status system_state_local;
   char msg[20];
+
+  strip.SetPixelColor(0, green);
+  strip.Show();
+
   for (;;) {  // A Task shall never return or exit.
 
     xSemaphoreTake(xStatusMutex, portMAX_DELAY);

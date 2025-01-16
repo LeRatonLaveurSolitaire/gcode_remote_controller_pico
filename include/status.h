@@ -1,6 +1,7 @@
 #ifndef STATUS_H
 #define STATUS_H
 
+#include <NeoPixelBus.h>
 #include "FreeRTOS.h"
 #include "semphr.h"
 
@@ -38,5 +39,15 @@ extern global_status system_state;
 extern SemaphoreHandle_t xStatusMutex;
 extern SemaphoreHandle_t xSerialMutex;
 extern QueueHandle_t xCommmandQueue;
+
+#define colorSaturation 128
+
+extern RgbColor red;
+extern RgbColor green;
+extern RgbColor blue;
+extern RgbColor white;
+extern RgbColor black;
+
+extern NeoPixelBus<NeoRgbFeature, NeoWs2812xMethod> strip;
 
 #endif

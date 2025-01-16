@@ -1,8 +1,8 @@
 #include <Arduino.h>
 #include <FreeRTOS.h>
 #include <status.h>
-#include <task.h>
 #include <stdio.h>
+#include <task.h>
 #include "semphr.h"
 
 #define PIN_ENC_READ 7
@@ -50,16 +50,16 @@ void TaskEncoder(void* pvParameters) {
   attachInterrupt(PIN_ENC_TRIG, IRQ_encode, RISING);
   attachInterrupt(PIN_ENC_SWTC, IRQ_switch, FALLING);
 
-  attachInterrupt(PIN_F_PLUS,IRQ_F_plus , FALLING);
-  attachInterrupt(PIN_F_MINUS,IRQ_F_minus , FALLING);
-  attachInterrupt(PIN_SETP_PLUS,IRQ_step_plus , FALLING);
-  attachInterrupt(PIN_SETP_MINUS,IRQ_step_minus , FALLING);
-  attachInterrupt(PIN_SET_0,IRQ_set_0 , FALLING);
+  attachInterrupt(PIN_F_PLUS, IRQ_F_plus, FALLING);
+  attachInterrupt(PIN_F_MINUS, IRQ_F_minus, FALLING);
+  attachInterrupt(PIN_SETP_PLUS, IRQ_step_plus, FALLING);
+  attachInterrupt(PIN_SETP_MINUS, IRQ_step_minus, FALLING);
+  attachInterrupt(PIN_SET_0, IRQ_set_0, FALLING);
   attachInterrupt(PIN_GOTO_0, IRQ_goto_0, FALLING);
-  attachInterrupt(PIN_EMERGENCY_STOP,IRQ_emergency_stop , FALLING);
+  attachInterrupt(PIN_EMERGENCY_STOP, IRQ_emergency_stop, FALLING);
 
   global_status system_state_local;
-  char command_to_send[50]={};
+  char command_to_send[50] = {};
   for (;;) {  // A Task shall never return or exit.
 
     if (encoder_val) {
@@ -84,32 +84,32 @@ void TaskEncoder(void* pvParameters) {
       }
 
       else {
-
         sprintf(command_to_send, "$J=G91 G1 F%.1f %c%.2f ",
                 system_state_local.f,
                 axis_chr[system_state_local.selected_axis],
-                system_state_local.step_size * encoder_val
-                );
-        if(xQueueSendToFront(xCommmandQueue, command_to_send, portMAX_DELAY) == pdTRUE) {}//Serial.println("sent");
+                system_state_local.step_size * encoder_val);
+        if (xQueueSendToFront(xCommmandQueue, command_to_send, portMAX_DELAY) ==
+            pdTRUE) {
+        }
 
         switch (system_state_local.selected_axis) {
           case AXIS_X:
             xSemaphoreTake(xStatusMutex, portMAX_DELAY);
-            system_state.x +=system_state_local.step_size * encoder_val;
+            system_state.x += system_state_local.step_size * encoder_val;
             xSemaphoreGive(xStatusMutex);
             break;
           case AXIS_Y:
             xSemaphoreTake(xStatusMutex, portMAX_DELAY);
-            system_state.y +=system_state_local.step_size * encoder_val;
+            system_state.y += system_state_local.step_size * encoder_val;
             xSemaphoreGive(xStatusMutex);
             break;
           case AXIS_Z:
             xSemaphoreTake(xStatusMutex, portMAX_DELAY);
-            system_state.z +=system_state_local.step_size * encoder_val;
+            system_state.z += system_state_local.step_size * encoder_val;
             xSemaphoreGive(xStatusMutex);
             break;
           default:
-            break;  
+            break;
         }
       }
       encoder_val = 0;
@@ -124,7 +124,7 @@ void TaskEncoder(void* pvParameters) {
 
     if (F_plus) {
       xSemaphoreTake(xStatusMutex, portMAX_DELAY);
-      if (system_state.f < MAX_SPEED){
+      if (system_state.f < MAX_SPEED) {
         system_state.f += 10;
       }
       xSemaphoreGive(xStatusMutex);
@@ -133,40 +133,44 @@ void TaskEncoder(void* pvParameters) {
 
     if (F_minus) {
       xSemaphoreTake(xStatusMutex, portMAX_DELAY);
-      if (system_state.f > MIN_SPEED){
+      if (system_state.f > MIN_SPEED) {
         system_state.f -= 10;
       }
       xSemaphoreGive(xStatusMutex);
-      F_minus= 0;
+      F_minus = 0;
     }
     if (step_plus_val) {
       xSemaphoreTake(xStatusMutex, portMAX_DELAY);
-      if (system_state.step_size < 0.9*MAX_STEP){
+      if (system_state.step_size < 0.9 * MAX_STEP) {
         system_state.step_size *= 10;
       }
       xSemaphoreGive(xStatusMutex);
-      step_plus_val= 0;
+      step_plus_val = 0;
     }
 
     if (step_minus_val) {
       xSemaphoreTake(xStatusMutex, portMAX_DELAY);
-      if (system_state.step_size > 1.1 * MIN_STEP){
+      if (system_state.step_size > 1.1 * MIN_STEP) {
         system_state.step_size /= 10;
       }
       xSemaphoreGive(xStatusMutex);
-      step_minus_val= 0;
+      step_minus_val = 0;
     }
 
     if (set_0_val) {
       sprintf(command_to_send, "G28.1");
-      if(xQueueSendToFront(xCommmandQueue, command_to_send, portMAX_DELAY) == pdTRUE) {}
-      set_0_val= 0;
+      if (xQueueSendToFront(xCommmandQueue, command_to_send, portMAX_DELAY) ==
+          pdTRUE) {
+      }
+      set_0_val = 0;
     }
 
     if (goto_0_val) {
       sprintf(command_to_send, "G28");
-      if(xQueueSendToFront(xCommmandQueue, command_to_send, portMAX_DELAY) == pdTRUE) {}
-      goto_0_val= 0;
+      if (xQueueSendToFront(xCommmandQueue, command_to_send, portMAX_DELAY) ==
+          pdTRUE) {
+      }
+      goto_0_val = 0;
     }
 
     vTaskDelay(pdMS_TO_TICKS(50));
@@ -178,7 +182,7 @@ void IRQ_encode() {
   // if (millis() - last_called > 10){
 
   // 1 if rotated clockwise, -1 if rotated anti-clockwise
-  encoder_val =  2 * digitalRead(PIN_ENC_READ) - 1;
+  // encoder_val = 2 * digitalRead(PIN_ENC_READ) - 1;
 
   // }
   // last_called = millis();
@@ -187,31 +191,31 @@ void IRQ_switch() {
   switch_val = 1;
 }
 
-void IRQ_F_plus(){
+void IRQ_F_plus() {
   F_plus = 1;
 }
 
-void IRQ_F_minus(){
+void IRQ_F_minus() {
   F_minus = 1;
 }
 
-void IRQ_step_plus(){
+void IRQ_step_plus() {
   step_plus_val = 1;
 }
 
-void IRQ_step_minus(){
+void IRQ_step_minus() {
   step_minus_val = 1;
 }
 
-void IRQ_set_0(){
+void IRQ_set_0() {
   set_0_val = 1;
 }
 
-void IRQ_goto_0(){
+void IRQ_goto_0() {
   goto_0_val = 1;
 }
 
-void IRQ_emergency_stop(){
+void IRQ_emergency_stop() {
   xSemaphoreTake(xSerialMutex, portMAX_DELAY);
   Serial.println(0x85);
   xQueueReset(xCommmandQueue);
