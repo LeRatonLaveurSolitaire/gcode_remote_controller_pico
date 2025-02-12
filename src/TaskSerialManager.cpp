@@ -11,10 +11,10 @@ void TaskSerialManager(void* pvParameters) {
   bool is_available = false;
 
   for (;;) {  // A Task shall never return or exit.
-    xSemaphoreTake(xSerialMutex, portMAX_DELAY);
-    Serial.println('?');
-    xSemaphoreGive(xSerialMutex);
-    vTaskDelay(pdMS_TO_TICKS(10));
+    // xSemaphoreTake(xSerialMutex, portMAX_DELAY);
+    // Serial.println('?');
+    // xSemaphoreGive(xSerialMutex);
+    // vTaskDelay(pdMS_TO_TICKS(10));
 
     if (Serial.available()){
       is_available = true;
@@ -35,11 +35,17 @@ void TaskSerialManager(void* pvParameters) {
     }
     // TODO : send messages only if connected
     if (xQueueReceive(xCommmandQueue, msg, 10) == pdTRUE){
+      strip.SetPixelColor(0, orange);
+      strip.Show();
       xSemaphoreTake(xSerialMutex, portMAX_DELAY);
       Serial.println(msg);
       xSemaphoreGive(xSerialMutex);
       vTaskDelay(pdMS_TO_TICKS(10));
       // TODO : handle 'OK' response
+    }
+    else{
+      strip.SetPixelColor(0, green);
+      strip.Show();
     }
 
     vTaskDelay(pdMS_TO_TICKS(30));

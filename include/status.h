@@ -47,6 +47,7 @@ extern RgbColor green;
 extern RgbColor blue;
 extern RgbColor white;
 extern RgbColor black;
+extern RgbColor orange;
 
 extern NeoPixelBus<NeoRgbFeature, NeoWs2812xMethod> strip;
 

@@ -37,7 +37,7 @@ volatile int goto_0_val = 0;
 
 void TaskEncoder(void* pvParameters) {
   pinMode(PIN_ENC_READ, INPUT_PULLUP);
-  pinMode(PIN_ENC_TRIG, INPUT_PULLUP);
+  pinMode(PIN_ENC_TRIG, INPUT);
   pinMode(PIN_ENC_SWTC, INPUT_PULLUP);
   pinMode(PIN_F_PLUS, INPUT_PULLUP);
   pinMode(PIN_F_MINUS, INPUT_PULLUP);
@@ -47,7 +47,7 @@ void TaskEncoder(void* pvParameters) {
   pinMode(PIN_GOTO_0, INPUT_PULLUP);
   pinMode(PIN_EMERGENCY_STOP, INPUT_PULLUP);
 
-  attachInterrupt(PIN_ENC_TRIG, IRQ_encode, RISING);
+  attachInterrupt(PIN_ENC_TRIG, IRQ_encode, FALLING);
   attachInterrupt(PIN_ENC_SWTC, IRQ_switch, FALLING);
 
   attachInterrupt(PIN_F_PLUS, IRQ_F_plus, FALLING);
@@ -79,7 +79,10 @@ void TaskEncoder(void* pvParameters) {
       if (!system_state_local.axis_is_selected) {
         xSemaphoreTake(xStatusMutex, portMAX_DELAY);
         system_state.selected_axis =
-            (system_state.selected_axis + 1) % NUMBER_OF_AXIS;
+            (system_state.selected_axis + encoder_val/abs(encoder_val)) % NUMBER_OF_AXIS;
+        if(system_state.selected_axis < 0){
+          system_state.selected_axis = NUMBER_OF_AXIS -1;
+        }
         xSemaphoreGive(xStatusMutex);
       }
 
@@ -173,7 +176,7 @@ void TaskEncoder(void* pvParameters) {
       goto_0_val = 0;
     }
 
-    vTaskDelay(pdMS_TO_TICKS(50));
+    vTaskDelay(pdMS_TO_TICKS(10));
   }
 }
 
@@ -182,7 +185,8 @@ void IRQ_encode() {
   // if (millis() - last_called > 10){
 
   // 1 if rotated clockwise, -1 if rotated anti-clockwise
-  // encoder_val = 2 * digitalRead(PIN_ENC_READ) - 1;
+  encoder_val = 1 - 2 * digitalRead(PIN_ENC_READ);
+  //Serial.println(encoder_val);
 
   // }
   // last_called = millis();

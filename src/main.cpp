@@ -24,6 +24,7 @@ RgbColor red(0, colorSaturation, 0);
 RgbColor green(colorSaturation, 0, 0);
 RgbColor blue(0, 0, colorSaturation);
 RgbColor white(colorSaturation);
+RgbColor orange(colorSaturation/2, colorSaturation, 0);
 RgbColor black(0);
 
 NeoPixelBus<NeoRgbFeature, NeoWs2812xMethod> strip(PixelCount, PixelPin);
