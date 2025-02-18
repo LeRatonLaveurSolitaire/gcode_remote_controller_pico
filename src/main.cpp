@@ -10,6 +10,7 @@
 #include "TaskEncoder.h"
 #include "TaskScreen.h"
 #include "TaskSerialManager.h"
+#include "TaskInputParser.h"
 #include "semphr.h"
 
 SemaphoreHandle_t xStatusMutex = NULL;
@@ -43,34 +44,44 @@ void setup() {
 
   xTaskCreate(
 
-      TaskEncoder, "Encoder",
-      1024,  // Stack size
-      NULL,
-      2,  // Priority
-      NULL
+    TaskEncoder, "Encoder",
+    64,  // Stack size
+    NULL,
+    2,  // Priority
+    NULL
 
   );
 
   xTaskCreate(
 
-      TaskSerialManager, "SerialManager",
-      1024,  // Stack size
-      NULL,
-      2,  // Priority
-      NULL
+    TaskInputParser, "InputParser",
+    1024,  // Stack size
+    NULL,
+    2,  // Priority
+    NULL
+
+);
+
+  xTaskCreate(
+
+    TaskSerialManager, "SerialManager",
+    1024,  // Stack size
+    NULL,
+    2,  // Priority
+    NULL
 
   );
 
   xTaskCreate(
 
-      TaskScreen,
-      "Screen",  // A name just for humans
-      4096,  // This stack size can be checked & adjusted by reading the Stack
-             // Highwater
-      NULL,
-      1,  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and
-          // 0 being the lowest.
-      NULL
+    TaskScreen,
+    "Screen",  // A name just for humans
+    4096,  // This stack size can be checked & adjusted by reading the Stack
+            // Highwater
+    NULL,
+    1,  // Priority, with 3 (configMAX_PRIORITIES - 1) being the highest, and
+        // 0 being the lowest.
+    NULL
 
   );
 }
