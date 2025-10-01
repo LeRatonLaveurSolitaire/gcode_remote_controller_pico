@@ -87,7 +87,7 @@ void TaskScreen(void* pvParameters) {
       u8g2.print(msg);
       u8g2.setDrawColor(1);
       u8g2.setCursor(66, 16 * 4 - 2);
-      u8g2.print(system_state_local.axis_is_selected);
+      u8g2.print(digitalRead(13));  // system_state_local.axis_is_selected);
 
       switch (system_state_local.communication_state) {
         case STATE_UNKNWON:
@@ -104,6 +104,14 @@ void TaskScreen(void* pvParameters) {
       }
 
     } while (u8g2.nextPage());
+
+    char command_to_send[50];
+    sprintf(command_to_send,
+            "?");  // answer type :
+                   // <Idle|MPos:0.000,0.000,0.000|FS:0,0|WCO:8.430,0.000,4.000>
+    if (xQueueSendToFront(xCommmandQueue, command_to_send, portMAX_DELAY) ==
+        pdTRUE) {
+    }
 
     vTaskDelay(pdMS_TO_TICKS(200));
 

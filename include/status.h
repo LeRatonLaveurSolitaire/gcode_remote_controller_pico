@@ -2,12 +2,18 @@
 #define STATUS_H
 
 #include <NeoPixelBus.h>
+
 #include "FreeRTOS.h"
 #include "semphr.h"
 
 #define STATE_UNKNWON 0
 #define STATE_WORK 1
 #define STATE_IDLE 2
+#define STATE_RUN 3
+#define STATE_JOG 4
+#define STATE_HOLD 5
+#define STATE_ALARM 6
+#define STATE_CHECK 7
 
 #define NUMBER_OF_AXIS 3
 

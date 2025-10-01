@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "wire.h": "c",
-        "arduino.h": "c"
+        "arduino.h": "c",
+        "cstring": "cpp"
     }
 }

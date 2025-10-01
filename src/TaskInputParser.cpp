@@ -3,6 +3,7 @@
 #include <status.h>
 #include <stdio.h>
 #include <task.h>
+
 #include "semphr.h"
 
 #define DEBOUNCE_MS 100
@@ -33,9 +34,7 @@ volatile int step_minus_val = 0;
 volatile int set_0_val = 0;
 volatile int goto_0_val = 0;
 
-
 void TaskInputParser(void* pvParameters) {
-
   pinMode(PIN_ENC_SWTC, INPUT_PULLUP);
   pinMode(PIN_F_PLUS, INPUT_PULLUP);
   pinMode(PIN_F_MINUS, INPUT_PULLUP);
@@ -60,10 +59,9 @@ void TaskInputParser(void* pvParameters) {
   int rotated = 0;
   for (;;) {  // A Task shall never return or exit.
 
-
     rotated = encoder_val >> 2;
     if (rotated) {
-      //Serial.println(encoder_val);
+      // Serial.println(encoder_val);
 
       xSemaphoreTake(xStatusMutex, portMAX_DELAY);
       system_state_local.x = system_state.x;
@@ -78,17 +76,16 @@ void TaskInputParser(void* pvParameters) {
 
       if (!system_state_local.axis_is_selected) {
         xSemaphoreTake(xStatusMutex, portMAX_DELAY);
-        system_state.selected_axis =
-            (system_state.selected_axis + rotated) % NUMBER_OF_AXIS;
-        if(system_state.selected_axis < 0){
-          system_state.selected_axis = NUMBER_OF_AXIS -1;
+        // system_state.selected_axis =
+        //     (system_state.selected_axis + rotated) % NUMBER_OF_AXIS;
+        if (system_state.selected_axis < 0) {
+          system_state.selected_axis = NUMBER_OF_AXIS - 1;
         }
         xSemaphoreGive(xStatusMutex);
       }
 
       else {
-        sprintf(command_to_send, "$J=G91 G1 F%.1f %c%.2f ",
-                system_state_local.f,
+        sprintf(command_to_send, "G91 G1 F%.1f %c%.2f ", system_state_local.f,
                 axis_chr[system_state_local.selected_axis],
                 system_state_local.step_size * rotated);
         if (xQueueSendToFront(xCommmandQueue, command_to_send, portMAX_DELAY) ==
@@ -115,8 +112,8 @@ void TaskInputParser(void* pvParameters) {
             break;
         }
       }
-      
-      encoder_val -= rotated<<2;
+
+      encoder_val -= rotated << 2;
     }
 
     if (switch_val) {
@@ -162,7 +159,8 @@ void TaskInputParser(void* pvParameters) {
     }
 
     if (set_0_val) {
-      sprintf(command_to_send, "G28.1");
+      const char stop = 0x18;
+      sprintf(command_to_send, &stop);
       if (xQueueSendToFront(xCommmandQueue, command_to_send, portMAX_DELAY) ==
           pdTRUE) {
       }
@@ -182,64 +180,64 @@ void TaskInputParser(void* pvParameters) {
 }
 
 void IRQ_switch() {
-    static unsigned long last_call = 0;
-    if (last_call - millis() > DEBOUNCE_MS ){
-        switch_val = 1;
-        last_call = millis();
-    }
+  static unsigned long last_call = 0;
+  if (last_call - millis() > DEBOUNCE_MS) {
+    switch_val = 1;
+    last_call = millis();
+  }
 }
 
 void IRQ_F_plus() {
-    static unsigned long last_call = 0;
-    if (last_call - millis() > DEBOUNCE_MS ){
-        F_plus = 1;
-        last_call = millis();
-    }
+  static unsigned long last_call = 0;
+  if (last_call - millis() > DEBOUNCE_MS) {
+    F_plus = 1;
+    last_call = millis();
+  }
 }
 
 void IRQ_F_minus() {
-    static unsigned long last_call = 0;
-    if (last_call - millis() > DEBOUNCE_MS ){
-        F_minus = 1;
-        last_call = millis();
-    }
+  static unsigned long last_call = 0;
+  if (last_call - millis() > DEBOUNCE_MS) {
+    F_minus = 1;
+    last_call = millis();
+  }
 }
 
 void IRQ_step_plus() {
-    static unsigned long last_call = 0;
-    if (last_call - millis() > DEBOUNCE_MS ){
-        step_plus_val = 1;
-        last_call = millis();
-    }
+  static unsigned long last_call = 0;
+  if (last_call - millis() > DEBOUNCE_MS) {
+    step_plus_val = 1;
+    last_call = millis();
+  }
 }
 
 void IRQ_step_minus() {
-    static unsigned long last_call = 0;
-    if (last_call - millis() > DEBOUNCE_MS ){
-        step_minus_val = 1;
-        last_call = millis();
-    }
+  static unsigned long last_call = 0;
+  if (last_call - millis() > DEBOUNCE_MS) {
+    step_minus_val = 1;
+    last_call = millis();
+  }
 }
 
 void IRQ_set_0() {
-    static unsigned long last_call = 0;
-    if (last_call - millis() > DEBOUNCE_MS ){
-        set_0_val = 1;
-        last_call = millis();
-    }
+  static unsigned long last_call = 0;
+  if (last_call - millis() > DEBOUNCE_MS) {
+    set_0_val = 1;
+    last_call = millis();
+  }
 }
 
 void IRQ_goto_0() {
-    static unsigned long last_call = 0;
-    if (last_call - millis() > DEBOUNCE_MS ){
-        goto_0_val = 1;
-        last_call = millis();
-    }
+  static unsigned long last_call = 0;
+  if (last_call - millis() > DEBOUNCE_MS) {
+    goto_0_val = 1;
+    last_call = millis();
+  }
 }
 
 void IRQ_emergency_stop() {
   xSemaphoreTake(xSerialMutex, portMAX_DELAY);
-  Serial.println(0x85);
+  Serial1.println(0x85);
   xQueueReset(xCommmandQueue);
   xSemaphoreGive(xSerialMutex);
 }

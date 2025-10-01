@@ -21,11 +21,11 @@ global_status system_state;
 const uint16_t PixelCount = 1;
 const uint8_t PixelPin = 16;
 
-RgbColor red(0, colorSaturation, 0);
-RgbColor green(colorSaturation, 0, 0);
-RgbColor blue(0, 0, colorSaturation);
-RgbColor white(colorSaturation);
-RgbColor orange(colorSaturation/2, colorSaturation, 0);
+RgbColor red(0, colorSaturation/2, 0);
+RgbColor green(colorSaturation/2, 0, 0);
+RgbColor blue(0, 0, colorSaturation/2);
+RgbColor white(colorSaturation/2);
+RgbColor orange(colorSaturation/4, colorSaturation/2, 0);
 RgbColor black(0);
 
 NeoPixelBus<NeoRgbFeature, NeoWs2812xMethod> strip(PixelCount, PixelPin);
