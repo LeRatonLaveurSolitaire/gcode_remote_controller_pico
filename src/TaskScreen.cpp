@@ -99,6 +99,21 @@ void TaskScreen(void* pvParameters) {
         case STATE_WORK:
           u8g2.drawStr(3, 16 * 4 - 2, "WORK");
           break;
+        case STATE_JOG:
+          u8g2.drawStr(3, 16 * 4 - 2, "JOG");
+          break;
+        case STATE_HOLD:
+          u8g2.drawStr(3, 16 * 4 - 2, "HOLD");
+          break;
+        case STATE_ALARM:
+          u8g2.drawStr(3, 16 * 4 - 2, "ALARM");
+          break;
+        case STATE_CHECK:
+          u8g2.drawStr(3, 16 * 4 - 2, "CHECK");
+          break;
+        case STATE_RUN:
+          u8g2.drawStr(3, 16 * 4 - 2, "RUN");
+          break;
         default:
           break;
       }

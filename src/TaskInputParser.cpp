@@ -76,8 +76,8 @@ void TaskInputParser(void* pvParameters) {
 
       if (!system_state_local.axis_is_selected) {
         xSemaphoreTake(xStatusMutex, portMAX_DELAY);
-        // system_state.selected_axis =
-        //     (system_state.selected_axis + rotated) % NUMBER_OF_AXIS;
+        system_state.selected_axis =
+            (system_state.selected_axis + rotated) % NUMBER_OF_AXIS;
         if (system_state.selected_axis < 0) {
           system_state.selected_axis = NUMBER_OF_AXIS - 1;
         }
@@ -92,25 +92,25 @@ void TaskInputParser(void* pvParameters) {
             pdTRUE) {
         }
 
-        switch (system_state_local.selected_axis) {
-          case AXIS_X:
-            xSemaphoreTake(xStatusMutex, portMAX_DELAY);
-            system_state.x += system_state_local.step_size * rotated;
-            xSemaphoreGive(xStatusMutex);
-            break;
-          case AXIS_Y:
-            xSemaphoreTake(xStatusMutex, portMAX_DELAY);
-            system_state.y += system_state_local.step_size * rotated;
-            xSemaphoreGive(xStatusMutex);
-            break;
-          case AXIS_Z:
-            xSemaphoreTake(xStatusMutex, portMAX_DELAY);
-            system_state.z += system_state_local.step_size * rotated;
-            xSemaphoreGive(xStatusMutex);
-            break;
-          default:
-            break;
-        }
+        // switch (system_state_local.selected_axis) {
+        //   case AXIS_X:
+        //     xSemaphoreTake(xStatusMutex, portMAX_DELAY);
+        //     system_state.x += system_state_local.step_size * rotated;
+        //     xSemaphoreGive(xStatusMutex);
+        //     break;
+        //   case AXIS_Y:
+        //     xSemaphoreTake(xStatusMutex, portMAX_DELAY);
+        //     system_state.y += system_state_local.step_size * rotated;
+        //     xSemaphoreGive(xStatusMutex);
+        //     break;
+        //   case AXIS_Z:
+        //     xSemaphoreTake(xStatusMutex, portMAX_DELAY);
+        //     system_state.z += system_state_local.step_size * rotated;
+        //     xSemaphoreGive(xStatusMutex);
+        //     break;
+        //   default:
+        //     break;
+        // }
       }
 
       encoder_val -= rotated << 2;
